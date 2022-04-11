@@ -1,0 +1,39 @@
+{
+  "name": "@module/authentication",
+  "version": "1.0.0",
+  "main": "dist/src/index.js",
+  "license": "MIT",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint --ext .js,.ts src test",
+    "build": "npx tsc --project ./tsconfig.json",
+    "build:watch": "npx tsc --project ./tsconfig.json --watch",
+    "prepublishOnly": "npm run lint && npm run test && npm run build",
+    "generate": "npx prisma generate --schema=./prisma/schema.prisma",
+    "migrate": "npx prisma migrate dev --schema=./prisma/schema.prisma"
+  },
+  "dependencies": {
+    "@libs/entity-lib": "1.0.0",
+    "@prisma/client": "^3.11.1",
+    "bcrypt": "^5.0.1",
+    "class-validator": "^0.13.2",
+    "email-validator": "^2.0.4",
+    "inversify": "^6.0.1",
+    "jest-mock-extended": "^2.0.5",
+    "jsonwebtoken": "^8.5.1",
+    "lodash": "^4.17.21",
+    "redis": "^4.0.6",
+    "reflect-metadata": "^0.1.13",
+    "ts-jest": "^27.1.4"
+  },
+  "devDependencies": {
+    "@libs/eslint-config-base": "1.0.0",
+    "@libs/jest-config-lib": "1.0.0",
+    "@libs/tsconfig-lib": "1.0.0",
+    "@types/bcrypt": "^5.0.0",
+    "@types/jsonwebtoken": "^8.5.8",
+    "@types/lodash": "^4.14.181",
+    "prisma": "^3.11.1"
+  }
+}
