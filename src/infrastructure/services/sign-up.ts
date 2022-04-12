@@ -3,8 +3,9 @@ import { injectable, inject } from 'inversify';
 
 import { Accounts } from '../../domain/entities/accounts';
 import { Encrypt } from '../../domain/libraries/encrypt';
-import { Token } from '../libraries/token';
+import { TokenJwt } from '../libraries/token-jwt';
 import client from '../../config/database-client';
+import { Token } from '../../domain/libraries/token';
 
 @injectable()
 export class SignUpService {
@@ -12,7 +13,7 @@ export class SignUpService {
     @inject(Encrypt) private readonly encrypt: Encrypt,
   ) {}
 
-  public async signUp(username: string, email: string, password: string): Promise<string> {
+  public async signUp(username: string, email: string, password: string): Promise<Token> {
     if (!this.validateEmail(email)) {
       throw new Error('Invalid email');
     }
@@ -24,13 +25,15 @@ export class SignUpService {
 
     const account = Accounts.create({ username, email, password: encryptedPassword });
 
-    account.token = await Token.encrypt({ ...account });
+    const token = new TokenJwt({ ...account });
+
+    account.token = token.getToken();
 
     await client.accounts.create({
       data: account.getData(),
     });
 
-    return account.token;
+    return token;
   }
 
   private validateEmail(email: string): boolean {

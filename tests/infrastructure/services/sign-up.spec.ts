@@ -1,24 +1,27 @@
-import { Token } from '../../../src';
+import { Accounts } from '@prisma/client';
+
 import { EncryptBcrypt } from '../../../src/infrastructure/libraries/encrypt-bcrypt';
+import { TokenJwt } from '../../../src/infrastructure/libraries/token-jwt';
 import { SignUpService } from '../../../src/infrastructure/services/sign-up';
 import { prismaMockClient } from '../../setup';
 
 describe('SignUpService', () => {
   beforeAll(() => {
-    Token.environments = {
+    TokenJwt.config({
       secretOrPrivateKey: '92bf7dcd-5089-40a2-b623-af1f502a5e0e',
-      expirationTime: '1h',
-    };
+      expiresIn: '1h',
+    });
   });
+
   it('should be return a accounts if username and email is available', async () => {
-    prismaMockClient.accounts.findMany.mockResolvedValue([]);
+    mockAccountsDatabase();
     const signUpService = new SignUpService(new EncryptBcrypt());
     const username = 'username';
     const email = 'email@email.com';
     const password = 'password';
 
     const token = await signUpService.signUp(username, email, password);
-    expect(Token.validate(token)).toBeTruthy();
+    expect(token.isValid()).toBeTruthy();
   });
 
   it('should be throw if username or email is used', async () => {
@@ -31,8 +34,7 @@ describe('SignUpService', () => {
       createdAt: new Date(),
       updatedAt: new Date(),
     };
-
-    prismaMockClient.accounts.findMany.mockResolvedValue([account]);
+    mockAccountsDatabase([account]);
 
     const signUpService = new SignUpService(new EncryptBcrypt());
 
@@ -47,3 +49,7 @@ describe('SignUpService', () => {
     await expect(promise).rejects.toThrowError('Invalid email');
   });
 });
+
+function mockAccountsDatabase(accounts: Accounts[] = []): void {
+  prismaMockClient.accounts.findMany.mockResolvedValue(accounts);
+}

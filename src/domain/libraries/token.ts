@@ -1,33 +1,26 @@
 type Payload = string | object | Buffer
 
-abstract class Token {
-  private token!: string;
+export abstract class Token {
+  protected token!: string;
 
   private createdAt!: Date;
 
   constructor(payload: Payload) {
     this.generateToken(payload);
+    this.createdAt = new Date();
   }
 
-  public abstract verifyToken(token: string): Promise<boolean>;
-
-  public abstract getPayload(token: string): Promise<Payload>;
-
-  public async reloadToken(): Promise<string> {
+  public reloadToken(): string {
     if (this.isExpired()) {
       throw new Error('Token is expired');
     }
     this.createdAt = new Date();
 
-    const payload = await this.getPayload(this.token);
-    await this.generateToken(payload);
+    const payload = this.getPayload();
+    this.generateToken(payload);
 
     return this.token;
   }
-
-  protected abstract generateToken(payload: Payload): Promise<void>;
-
-  protected abstract getExpirationTime(): number;
 
   public getToken(): string {
     return this.token;
@@ -36,4 +29,12 @@ abstract class Token {
   public isExpired(): boolean {
     return this.createdAt.getTime() + this.getExpirationTime() < new Date().getTime();
   }
+
+  public abstract isValid(): boolean;
+
+  public abstract getPayload(): Payload;
+
+  protected abstract generateToken(payload: Payload): void;
+
+  protected abstract getExpirationTime(): number;
 }

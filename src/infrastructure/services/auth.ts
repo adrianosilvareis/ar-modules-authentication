@@ -1,6 +1,7 @@
 import { diContainer } from '../../config/di-container';
 import { SignUpService } from './sign-up';
-import { Token } from '../libraries/token';
+import { TokenJwt } from '../libraries/token-jwt';
+import { Token } from '../../domain/libraries/token';
 
 export interface AuthConfigEnvironments {
   jwt: {
@@ -15,7 +16,7 @@ export interface AuthConfigEnvironments {
 }
 
 export class Auth {
-  private static environments: AuthConfigEnvironments;
+  private static environments?: AuthConfigEnvironments;
 
   private static instance: Auth;
 
@@ -23,22 +24,22 @@ export class Auth {
     if (!Auth.environments) {
       throw new Error('Auth.config is not defined');
     }
-    Token.environments = {
+    TokenJwt.config({
       secretOrPrivateKey: Auth.environments.jwt.secret,
-      expirationTime: Auth.environments.jwt.expirationTime,
-    };
+      expiresIn: Auth.environments.jwt.expirationTime ?? '1h',
+    });
   }
 
-  public static config(config: AuthConfigEnvironments): void {
+  public static config(config?: AuthConfigEnvironments): void {
     Auth.environments = config;
-    Auth.instance = new Auth();
   }
 
   public static get(): Auth {
+    Auth.instance = new Auth();
     return Auth.instance;
   }
 
-  public signUp(username: string, email: string, password: string): Promise<string> {
+  public signUp(username: string, email: string, password: string): Promise<Token> {
     const service = diContainer.get(SignUpService);
     const token = service.signUp(username, email, password);
     return token;
