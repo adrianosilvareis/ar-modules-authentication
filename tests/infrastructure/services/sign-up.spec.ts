@@ -35,9 +35,7 @@ describe('SignUpService', () => {
       updatedAt: new Date(),
     };
     mockAccountsDatabase([account]);
-
     const signUpService = new SignUpService(new EncryptBcrypt());
-
     const promise = signUpService.signUp(account.username, account.email, account.password);
     await expect(promise).rejects.toThrowError('Email or username is already taken');
   });

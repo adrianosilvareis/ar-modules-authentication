@@ -1,7 +1,7 @@
 import validator from 'email-validator';
 import { injectable, inject } from 'inversify';
 
-import { Accounts } from '../../domain/entities/accounts';
+import { AccountParams, Accounts } from '../../domain/entities/accounts';
 import { Encrypt } from '../../domain/libraries/encrypt';
 import { TokenJwt } from '../libraries/token-jwt';
 import client from '../../config/database-client';
@@ -14,13 +14,38 @@ export class SignUpService {
   ) {}
 
   public async signUp(username: string, email: string, password: string): Promise<Token> {
-    if (!this.validateEmail(email)) {
+    this.validateEmail(email);
+
+    await this.isAvailableEmailOrUsername(username, email);
+
+    const [account, token] = await this.toAccountDomain({ username, email, password });
+
+    await this.saveAccount(account.getData());
+
+    return token;
+  }
+
+  private validateEmail(email: string): void {
+    if (!validator.validate(email)) {
       throw new Error('Invalid email');
     }
-    const isAvailable = await this.isAvailableEmailOrUsername(username, email);
-    if (!isAvailable) {
+  }
+
+  private async isAvailableEmailOrUsername(username: string, email: string): Promise<void> {
+    const found = await client.accounts.findMany({
+      where: {
+        OR: [{ username }, { email }],
+      },
+    });
+
+    if (found.length !== 0) {
       throw new Error('Email or username is already taken');
     }
+  }
+
+  private async toAccountDomain(params: Required<Omit<AccountParams, 'token'>>): Promise<[Accounts, Token]> {
+    const { username, email, password } = params;
+
     const encryptedPassword = await this.encrypt.encryptPassword(password);
 
     const account = Accounts.create({ username, email, password: encryptedPassword });
@@ -29,24 +54,10 @@ export class SignUpService {
 
     account.token = token.getToken();
 
-    await client.accounts.create({
-      data: account.getData(),
-    });
-
-    return token;
+    return [account, token];
   }
 
-  private validateEmail(email: string): boolean {
-    return validator.validate(email);
-  }
-
-  private async isAvailableEmailOrUsername(username: string, email: string): Promise<boolean> {
-    const found = await client.accounts.findMany({
-      where: {
-        OR: [{ username }, { email }],
-      },
-    });
-
-    return found.length === 0;
+  private async saveAccount(data: Required<AccountParams>): Promise<void> {
+    await client.accounts.create({ data });
   }
 }

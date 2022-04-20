@@ -9,13 +9,10 @@ describe('Auth', () => {
         expirationTime: '1h',
       },
       cache: {
-        timeout: 10000,
         host: 'localhost',
         port: 6379,
       },
     });
-
-    prismaMockClient.accounts.findMany.mockResolvedValue([]);
   });
 
   it('should throw if config is not defined', async () => {
@@ -28,6 +25,7 @@ describe('Auth', () => {
   });
 
   it('should be create account when signUp', async () => {
+    prismaMockClient.accounts.findMany.mockResolvedValue([]);
     const token = await Auth.get().signUp('username', 'email@email.com', 'password');
     expect(token.isValid()).toBeTruthy();
   });

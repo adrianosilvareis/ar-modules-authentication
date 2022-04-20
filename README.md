@@ -33,10 +33,6 @@ auth.config({
     host: process.env.REDIS_HOST,
     port: process.env.REDIS_PORT
   },
-  postgres: {
-    host: process.env.DATABASE_HOST,
-    port: process.env.DATABASE_PORT
-  },
   JWT: {
     secret: process.env.JWT_SECRET,
     expiration_time: process.env.JWT_EXPIRATION_TIME

@@ -15,6 +15,12 @@ export class TokenJwt extends Token {
     this.environments = env;
   }
 
+  public static setToken(token: string): Token {
+    const instance = new TokenJwt(token);
+    instance.token = token;
+    return instance;
+  }
+
   public isValid(): boolean {
     if (this.isExpired()) {
       return false;
@@ -27,7 +33,8 @@ export class TokenJwt extends Token {
     if (this.isExpired()) {
       throw new Error('Token is expired');
     }
-    const decoded = jwt.verify(this.token, TokenJwt.environments.secretOrPrivateKey) as JwtPayload;
+    const { secretOrPrivateKey } = TokenJwt.environments;
+    const decoded = jwt.verify(this.token, secretOrPrivateKey) as JwtPayload;
 
     return this.sanitization<T>(decoded);
   }
@@ -46,14 +53,14 @@ export class TokenJwt extends Token {
     return clone as T;
   }
 
-  protected generateToken(payload: string | object | Buffer): void {
+  protected generateToken(payload: string | object): void {
     if (TokenJwt.environments === undefined) {
       throw new Error('Token.environments is not defined');
     }
     const key = TokenJwt.environments.secretOrPrivateKey;
     const options = { expiresIn: this.getExpirationTime() };
-
-    this.token = jwt.sign(payload, key, options);
+    const data = typeof payload === 'string' ? { payload } : ({ ...payload });
+    this.token = jwt.sign(data, key, options);
   }
 
   protected getExpirationTime(): number {

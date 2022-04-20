@@ -11,7 +11,6 @@ export interface AuthConfigEnvironments {
   cache?: {
     host: string;
     port: number;
-    timeout: number;
   }
 }
 
@@ -35,7 +34,9 @@ export class Auth {
   }
 
   public static get(): Auth {
-    Auth.instance = new Auth();
+    if (Auth.instance === undefined) {
+      Auth.instance = new Auth();
+    }
     return Auth.instance;
   }
 
