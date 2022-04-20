@@ -1,16 +1,14 @@
+import { inject } from 'inversify';
+
 import { diContainer } from '../../config/di-container';
-import { SignUpService } from './sign-up';
 import { TokenJwt } from '../libraries/token-jwt';
 import { Token } from '../../domain/libraries/token';
+import { SignUpService } from '../../domain/services/sign-up';
 
 export interface AuthConfigEnvironments {
   jwt: {
     secret: string;
     expirationTime: string;
-  },
-  cache?: {
-    host: string;
-    port: number;
   }
 }
 
@@ -19,7 +17,9 @@ export class Auth {
 
   private static instance: Auth;
 
-  private constructor() {
+  private constructor(
+    @inject(SignUpService) private readonly service: SignUpService = diContainer.get(SignUpService),
+  ) {
     if (!Auth.environments) {
       throw new Error('Auth.config is not defined');
     }
@@ -41,8 +41,7 @@ export class Auth {
   }
 
   public signUp(username: string, email: string, password: string): Promise<Token> {
-    const service = diContainer.get(SignUpService);
-    const token = service.signUp(username, email, password);
+    const token = this.service.signUp(username, email, password);
     return token;
   }
 }

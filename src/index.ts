@@ -6,4 +6,3 @@ export { SignUpResponse } from './domain/presentation/sign-up-response';
 
 export { TokenJwt as Token } from './infrastructure/libraries/token-jwt';
 export { Auth } from './infrastructure/services/auth';
-export { SignUpService } from './infrastructure/services/sign-up';

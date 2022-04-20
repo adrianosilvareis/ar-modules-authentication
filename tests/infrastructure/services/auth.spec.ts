@@ -8,10 +8,6 @@ describe('Auth', () => {
         secret: 'test',
         expirationTime: '1h',
       },
-      cache: {
-        host: 'localhost',
-        port: 6379,
-      },
     });
   });
 

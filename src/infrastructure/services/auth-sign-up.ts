@@ -4,23 +4,27 @@ import { injectable, inject } from 'inversify';
 import { AccountParams, Accounts } from '../../domain/entities/accounts';
 import { Encrypt } from '../../domain/libraries/encrypt';
 import { TokenJwt } from '../libraries/token-jwt';
-import client from '../../config/database-client';
 import { Token } from '../../domain/libraries/token';
+import { SignUpService } from '../../domain/services/sign-up';
+import { AccountRepository } from '../../domain/repositories/account';
 
 @injectable()
-export class SignUpService {
+export class AuthSignUpService extends SignUpService {
   public constructor(
     @inject(Encrypt) private readonly encrypt: Encrypt,
-  ) {}
+    @inject(AccountRepository) private readonly repo: AccountRepository,
+  ) {
+    super();
+  }
 
   public async signUp(username: string, email: string, password: string): Promise<Token> {
     this.validateEmail(email);
 
-    await this.isAvailableEmailOrUsername(username, email);
+    await this.repo.isAvailableEmailOrUsername(username, email);
 
     const [account, token] = await this.toAccountDomain({ username, email, password });
 
-    await this.saveAccount(account.getData());
+    await this.repo.saveAccount(account.getData());
 
     return token;
   }
@@ -28,18 +32,6 @@ export class SignUpService {
   private validateEmail(email: string): void {
     if (!validator.validate(email)) {
       throw new Error('Invalid email');
-    }
-  }
-
-  private async isAvailableEmailOrUsername(username: string, email: string): Promise<void> {
-    const found = await client.accounts.findMany({
-      where: {
-        OR: [{ username }, { email }],
-      },
-    });
-
-    if (found.length !== 0) {
-      throw new Error('Email or username is already taken');
     }
   }
 
@@ -55,9 +47,5 @@ export class SignUpService {
     account.token = token.getToken();
 
     return [account, token];
-  }
-
-  private async saveAccount(data: Required<AccountParams>): Promise<void> {
-    await client.accounts.create({ data });
   }
 }
