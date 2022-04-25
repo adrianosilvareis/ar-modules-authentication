@@ -1,4 +1,6 @@
 import { Auth } from '../../../src';
+import { diContainer } from '../../../src/config/di-container';
+import { SignUpService } from '../../../src/domain/services/sign-up';
 import { prismaMockClient } from '../../setup';
 
 describe('Auth', () => {
@@ -11,18 +13,14 @@ describe('Auth', () => {
     });
   });
 
-  it('should throw if config is not defined', async () => {
-    Auth.config();
-    expect(Auth.get).toThrowError('Auth.config is not defined');
-  });
-
-  it('should be create a instance of auth with params', () => {
-    expect(Auth.get()).toBeDefined();
+  it('should throw if not configured before create instance', () => {
+    Auth.config(undefined);
+    expect(() => new Auth(diContainer.get(SignUpService))).toThrow();
   });
 
   it('should be create account when signUp', async () => {
     prismaMockClient.accounts.findMany.mockResolvedValue([]);
-    const token = await Auth.get().signUp('username', 'email@email.com', 'password');
+    const token = await new Auth(diContainer.get(SignUpService)).signUp('username', 'email@email.com', 'password');
     expect(token.isValid()).toBeTruthy();
   });
 });

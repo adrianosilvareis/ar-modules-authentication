@@ -29,6 +29,7 @@
     "ts-jest": "^27.1.4"
   },
   "devDependencies": {
+    "@libs/entity-builder": "1.0.0",
     "@libs/eslint-config-base": "1.0.0",
     "@libs/jest-config-lib": "1.0.0",
     "@libs/tsconfig-lib": "1.0.0",

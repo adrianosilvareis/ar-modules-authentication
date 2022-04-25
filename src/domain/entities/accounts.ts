@@ -12,7 +12,7 @@ export class Accounts extends Entity<AccountParams> {
 
   public readonly email!: string;
 
-  private readonly password?: string;
+  public readonly password?: string;
 
   public token?: string;
 
@@ -20,6 +20,7 @@ export class Accounts extends Entity<AccountParams> {
     return new Accounts(params, id, AccountId);
   }
 
+  // lastAccess, isLoggedIn, isActive
   public getData(): Required<AccountParams> {
     return {
       username: this.username,

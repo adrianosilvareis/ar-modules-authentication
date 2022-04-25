@@ -5,6 +5,8 @@ import { Encrypt } from '../../../src/domain/libraries/encrypt';
 import { AccountRepository } from '../../../src/domain/repositories/account';
 import { TokenJwt } from '../../../src/infrastructure/libraries/token-jwt';
 import { AuthSignUpService } from '../../../src/infrastructure/services/auth-sign-up';
+import { AccountsBuilder } from '../../builders/accounts';
+import { PostgresAccountsBuilder } from '../../builders/postgres-accounts';
 import { prismaMockClient } from '../../setup';
 
 describe('SignUpService', () => {
@@ -17,26 +19,15 @@ describe('SignUpService', () => {
 
   it('should be return a accounts if username and email is available', async () => {
     mockAccountsDatabase();
+    const account = new AccountsBuilder().build();
     const { signUpService } = makeSut();
 
-    const username = 'username';
-    const email = 'email@email.com';
-    const password = 'password';
-
-    const token = await signUpService.signUp(username, email, password);
+    const token = await signUpService.signUp(account.username, account.email, account.password ?? '');
     expect(token.isValid()).toBeTruthy();
   });
 
   it('should be throw if username or email is used', async () => {
-    const account = {
-      id: 'id',
-      username: 'username',
-      email: 'email@email.com',
-      password: 'password',
-      token: 'token',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    const account = new PostgresAccountsBuilder().build();
     mockAccountsDatabase([account]);
     const { signUpService } = makeSut();
     const promise = signUpService.signUp(account.username, account.email, account.password);
