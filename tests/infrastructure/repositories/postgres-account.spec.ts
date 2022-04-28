@@ -23,7 +23,7 @@ describe('PostgresAccountRepository', () => {
       const repo = new PostgresAccountRepository();
 
       const promise = repo.isAvailableEmailOrUsername(username, email);
-      await expect(promise).rejects.toThrow('Email or username is already taken');
+      await expect(promise).rejects.toThrow('Email or username is already in use');
     });
   });
 

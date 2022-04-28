@@ -31,7 +31,7 @@ describe('SignUpService', () => {
     mockAccountsDatabase([account]);
     const { signUpService } = makeSut();
     const promise = signUpService.signUp(account.username, account.email, account.password);
-    await expect(promise).rejects.toThrowError('Email or username is already taken');
+    await expect(promise).rejects.toThrowError('Email or username is already in use');
   });
 
   it('should be throw if invalid email', async () => {

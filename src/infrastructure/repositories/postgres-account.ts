@@ -3,6 +3,7 @@ import { injectable } from 'inversify';
 import { AccountParams, Accounts } from '../../domain/entities/accounts';
 import { AccountRepository } from '../../domain/repositories/account';
 import client from '../../config/database-client';
+import { UnavailableRequestError, UnexpectedError, NotFoundError } from '../../domain/erros';
 
 @injectable()
 export class PostgresAccountRepository extends AccountRepository {
@@ -14,7 +15,7 @@ export class PostgresAccountRepository extends AccountRepository {
     });
 
     if (found.length !== 0) {
-      throw new Error('Email or username is already taken');
+      throw new UnavailableRequestError('Email or username is already in use');
     }
   }
 
@@ -22,7 +23,7 @@ export class PostgresAccountRepository extends AccountRepository {
     try {
       await client.accounts.create({ data });
     } catch (error) {
-      throw new Error('Failed to save account');
+      throw new UnexpectedError('Failed to save account');
     }
   }
 
@@ -38,7 +39,7 @@ export class PostgresAccountRepository extends AccountRepository {
         },
       });
     } catch (error) {
-      throw new Error('Failed to save account');
+      throw new UnexpectedError('Failed to save account');
     }
   }
 
@@ -50,7 +51,7 @@ export class PostgresAccountRepository extends AccountRepository {
     });
 
     if (found.length === 0) {
-      throw new Error('Account not found');
+      throw new NotFoundError('Account not found');
     }
     const account = found[0];
     return Accounts.create({

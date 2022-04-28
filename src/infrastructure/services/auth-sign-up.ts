@@ -7,6 +7,7 @@ import { TokenJwt } from '../libraries/token-jwt';
 import { Token } from '../../domain/libraries/token';
 import { SignUpService } from '../../domain/services/sign-up';
 import { AccountRepository } from '../../domain/repositories/account';
+import { InvalidEmailError } from '../../domain/erros';
 
 @injectable()
 export class AuthSignUpService extends SignUpService {
@@ -31,7 +32,7 @@ export class AuthSignUpService extends SignUpService {
 
   private validateEmail(email: string): void {
     if (!validator.validate(email)) {
-      throw new Error('Invalid email');
+      throw new InvalidEmailError(`Invalid email: ${email}`);
     }
   }
 
