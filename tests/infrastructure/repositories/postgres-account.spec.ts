@@ -1,7 +1,6 @@
-import { Uuid } from '@libs/uuid-lib';
-
 import { PostgresAccountRepository } from '../../../src/infrastructure/repositories/postgres-account';
 import { AccountsBuilder } from '../../builders/accounts';
+import { PostgresAccountsBuilder } from '../../builders/postgres-accounts';
 import { prismaMockClient } from '../../setup';
 
 describe('PostgresAccountRepository', () => {
@@ -9,16 +8,9 @@ describe('PostgresAccountRepository', () => {
     it('should throw if username or email already exists', async () => {
       const username = 'username';
       const email = 'email@email.com';
+      const accountData = new PostgresAccountsBuilder().build();
 
-      prismaMockClient.accounts.findMany.mockResolvedValueOnce([{
-        id: 'id',
-        username,
-        email,
-        password: 'password',
-        token: 'token',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      }]);
+      prismaMockClient.accounts.findMany.mockResolvedValueOnce([accountData]);
 
       const repo = new PostgresAccountRepository();
 
@@ -54,15 +46,9 @@ describe('PostgresAccountRepository', () => {
 
     it('should return accounts with already exists', async () => {
       const emailOrUsername = 'emailOrUsername';
-      const accountData = {
-        id: Uuid.generate().toString(),
-        username: emailOrUsername,
-        email: 'email@email.com',
-        password: 'password',
-        token: 'token',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
+      const accountData = new PostgresAccountsBuilder()
+        .with('username', emailOrUsername)
+        .build();
       prismaMockClient.accounts.findMany.mockResolvedValueOnce([accountData]);
 
       const repo = new PostgresAccountRepository();

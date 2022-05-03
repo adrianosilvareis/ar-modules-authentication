@@ -58,7 +58,9 @@ export class PostgresAccountRepository extends AccountRepository {
       username: account.username,
       email: account.email,
       password: account.password,
-      token: account.token ?? '',
+      token: account.token ?? undefined,
+      isLoggedIn: account.isLoggedIn ?? false,
+      lastAccess: account.lastAccess ?? undefined,
     }, account.id);
   }
 }

@@ -38,7 +38,7 @@ describe('SignUpService', () => {
     const { signUpService } = makeSut();
 
     const promise = signUpService.signUp('username', 'email', 'password');
-    await expect(promise).rejects.toThrowError('Invalid email');
+    await expect(promise).rejects.toThrowError('Invalid email: email');
   });
 });
 

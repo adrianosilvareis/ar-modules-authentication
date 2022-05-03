@@ -1,4 +1,4 @@
-type Payload = string | object | Buffer
+export type Payload = string | object | Buffer
 
 export abstract class Token {
   protected token!: string;

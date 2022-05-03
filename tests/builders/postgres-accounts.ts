@@ -14,6 +14,8 @@ export class PostgresAccountsBuilder extends Builder<Accounts, PostgresAccountsB
       email: 'email@email.com',
       password: 'password',
       token: 'token',
+      isLoggedIn: true,
+      lastAccess: new Date(),
       createdAt: new Date(),
       updatedAt: new Date(),
     };

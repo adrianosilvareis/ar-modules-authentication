@@ -8,13 +8,15 @@ datasource db {
 }
 
 model Accounts {
-  id        String   @id @default(uuid())
-  username  String
-  email     String
-  password  String
-  token     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  id         String    @id @default(uuid())
+  username   String
+  email      String
+  password   String
+  token      String?
+  isLoggedIn Boolean
+  lastAccess DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @default(now()) @updatedAt
 }
 
 // todo: add isLoggedIn, isActive, isAdmin, profile, lastLogin

@@ -13,6 +13,8 @@ export class AccountsBuilder extends Builder<Accounts, AccountsBuilder> {
       email: 'email@email.com',
       password: 'password',
       token: 'token',
+      isLoggedIn: true,
+      lastAccess: new Date(),
     });
   }
 }

@@ -1,6 +1,9 @@
 import { Accounts } from '@prisma/client';
 
 import { diContainer } from '../../../src/config/di-container';
+import { NotFoundError } from '../../../src/domain/erros';
+import { BadRequestError } from '../../../src/domain/erros/bad-request';
+import { InvalidPasswordError } from '../../../src/domain/erros/invalid-password';
 import { Encrypt } from '../../../src/domain/libraries/encrypt';
 import { AccountRepository } from '../../../src/domain/repositories/account';
 import { TokenJwt } from '../../../src/infrastructure/libraries/token-jwt';
@@ -17,10 +20,15 @@ describe('SignInService', () => {
   });
 
   it('should be return a accounts if correct credentials', async () => {
-    const { signInService } = makeSut();
-
     const email = 'email@email.com';
     const password = 'password';
+    const accounts = new PostgresAccountsBuilder()
+      .with('isLoggedIn', false)
+      .with('email', email)
+      .with('password', password)
+      .buildMany(1);
+
+    const { signInService } = makeSut(accounts);
 
     const token = await signInService.signIn(email, password);
     expect(token.isValid()).toBeTruthy();
@@ -29,22 +37,28 @@ describe('SignInService', () => {
   it('should be throw if username or email not found', async () => {
     const { signInService } = makeSut([]);
     const promise = signInService.signIn('email@email.com', 'any_password');
-    await expect(promise).rejects.toThrowError('Account not found');
+    await expect(promise).rejects.toThrow(new NotFoundError('Account not found'));
   });
 
   it('should be throw if invalid email', async () => {
     const { signInService } = makeSut(undefined, mockEncrypt('', false));
 
     const promise = signInService.signIn('username', 'password');
-    await expect(promise).rejects.toThrowError('Invalid password');
+    await expect(promise).rejects.toThrow(new InvalidPasswordError());
+  });
+
+  it('should be throw if user already logged', async () => {
+    const { signInService } = makeSut();
+
+    const promise = signInService.signIn('username', 'password');
+    await expect(promise).rejects.toThrowError(new BadRequestError('Account already logged in'));
   });
 });
 
 function makeSut(accounts?:Accounts[], encrypt = mockEncrypt()) {
-  const account = new PostgresAccountsBuilder().build();
   if (accounts === undefined) {
     // eslint-disable-next-line no-param-reassign
-    accounts = [account];
+    accounts = [new PostgresAccountsBuilder().build()];
   }
   prismaMockClient.accounts.findMany.mockResolvedValue(accounts);
 
@@ -52,7 +66,7 @@ function makeSut(accounts?:Accounts[], encrypt = mockEncrypt()) {
     encrypt,
     diContainer.get(AccountRepository),
   );
-  return { signInService, account };
+  return { signInService, accounts };
 }
 
 function mockEncrypt(token: string = '', match: boolean = true): Encrypt {

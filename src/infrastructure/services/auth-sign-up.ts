@@ -32,11 +32,11 @@ export class AuthSignUpService extends SignUpService {
 
   private validateEmail(email: string): void {
     if (!validator.validate(email)) {
-      throw new InvalidEmailError(`Invalid email: ${email}`);
+      throw new InvalidEmailError(email);
     }
   }
 
-  private async toAccountDomain(params: Required<Omit<AccountParams, 'token'>>): Promise<[Accounts, Token]> {
+  private async toAccountDomain(params: Required<Omit<AccountParams, 'token' | 'isLoggedIn' | 'lastAccess'>>): Promise<[Accounts, Token]> {
     const { username, email, password } = params;
 
     const encryptedPassword = await this.encrypt.encryptPassword(password);
